@@ -10,18 +10,18 @@ from pathlib import Path
 import pynini
 
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 
 
 class CompileCliTests(unittest.TestCase):
     def test_stale_asset_and_invalid_fixture(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            shutil.copytree(ROOT / "ml", root / "ml", ignore=shutil.ignore_patterns("__pycache__"))
+            shutil.copytree(ROOT / "wfst", root / "wfst", ignore=shutil.ignore_patterns("__pycache__"))
             (root / "tools").mkdir()
             script = root / "tools" / "compile.py"
             shutil.copy2(ROOT / "tools" / "compile.py", script)
-            asset = root / "ml" / "assets" / "numbers.fst"
+            asset = root / "wfst" / "ml" / "assets" / "numbers.fst"
             pynini.accep("stale").write(str(asset))
             stale = asset.read_bytes()
             modified = asset.stat().st_mtime_ns
@@ -52,12 +52,12 @@ class CompileCliTests(unittest.TestCase):
                     self.assertEqual(asset.read_bytes(), before)
                     self.assertEqual(asset.stat().st_mtime_ns, modified)
                 else:
-                    self.assertIn("Compiled ml/assets/numbers.fst", result.stdout)
+                    self.assertIn("Compiled wfst/ml/assets/numbers.fst", result.stdout)
             compiled = asset.read_bytes()
             self.assertNotEqual(compiled, stale)
             modified = asset.stat().st_mtime_ns
 
-            (root / "ml" / "tests" / "numbers.tsv").write_text(
+            (root / "wfst" / "ml" / "tests" / "numbers.tsv").write_text(
                 "മുപ്പത്തിയേഴ്\t38\n", encoding="utf-8",
             )
             for arguments in modes:

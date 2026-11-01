@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 description = "WFST inverse text normalization for Indian languages, starting with Malayalam"
 include = [
-    "src/**", "tests/*.rs", "ml/**/*.py", "ml/**/*.tsv", "ml/assets/*.fst",
+    "src/**", "tests/*.rs", "wfst/**/*.py", "wfst/**/*.tsv", "wfst/*/assets/*.fst",
     "tools/*.py", "pyproject.toml", "requirements.txt", "Cargo.lock", "README.md",
 ]
 

@@ -6,7 +6,7 @@ import unicodedata
 import pynini
 from pynini.lib import pynutil, utf8
 
-from ml.rules.numbers.cardinal import build_numbers
+from wfst.ml.rules.numbers.cardinal import build_numbers
 
 
 def build_graph() -> pynini.Fst:

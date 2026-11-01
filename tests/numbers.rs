@@ -3,7 +3,7 @@ use inverse_text_normalization_rs::Normalizer;
 #[test]
 fn approved_numbers_and_preservation_fixtures() -> Result<(), Box<dyn std::error::Error>> {
     let normalizer = Normalizer::new("ml")?;
-    let fixture = include_str!("../ml/tests/numbers.tsv");
+    let fixture = include_str!("../wfst/ml/tests/numbers.tsv");
     assert!(!fixture.is_empty(), "empty number fixture");
     for line in fixture.lines() {
         let (spoken, expected) = line.split_once('\t').ok_or("missing fixture delimiter")?;

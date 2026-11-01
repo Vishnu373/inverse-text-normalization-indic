@@ -7,12 +7,12 @@ import unittest
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 
 
 class NormalizeCliTests(unittest.TestCase):
     def test_inputs_without_rewriting_asset(self) -> None:
-        asset = ROOT / "ml" / "assets" / "numbers.fst"
+        asset = ROOT / "wfst" / "ml" / "assets" / "numbers.fst"
         before = hashlib.sha256(asset.read_bytes()).digest()
         modified = asset.stat().st_mtime_ns
         for spoken, expected in [
@@ -24,7 +24,7 @@ class NormalizeCliTests(unittest.TestCase):
             with self.subTest(spoken=spoken):
                 result = subprocess.run(
                     [sys.executable, str(ROOT / "tools" / "normalize.py"), spoken],
-                    cwd=ROOT / "ml", capture_output=True, encoding="utf-8", check=False,
+                    cwd=ROOT / "wfst" / "ml", capture_output=True, encoding="utf-8", check=False,
                     timeout=30,
                 )
                 self.assertEqual(result.returncode, 0, result.stderr)
@@ -50,7 +50,7 @@ class NormalizeCliTests(unittest.TestCase):
             tools.mkdir()
             script = tools / "normalize.py"
             shutil.copy2(ROOT / "tools" / "normalize.py", script)
-            asset = root / "ml" / "assets" / "numbers.fst"
+            asset = root / "wfst" / "ml" / "assets" / "numbers.fst"
             for corrupt in (False, True):
                 with self.subTest(corrupt=corrupt):
                     if corrupt:

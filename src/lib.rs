@@ -51,7 +51,7 @@ impl Normalizer {
     /// Load a bundled language graph. Currently only `ml` is supported.
     pub fn new(language: &str) -> Result<Self, AppError> {
         let bytes: &[u8] = match language {
-            "ml" => include_bytes!("../ml/assets/numbers.fst"),
+            "ml" => include_bytes!("../wfst/ml/assets/numbers.fst"),
             _ => return Err(AppError::UnsupportedLanguage(language.to_owned())),
         };
         Ok(Self {

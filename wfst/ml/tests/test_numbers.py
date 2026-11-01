@@ -5,9 +5,9 @@ from typing import ClassVar
 import pynini
 from pynini.lib import rewrite
 
-from ml.rules.numbers import build_graph
-from ml.rules.numbers.cardinal import build_numbers
-from ml.tests import fixture_paths, read_fixtures
+from wfst.ml.rules.numbers import build_graph
+from wfst.ml.rules.numbers.cardinal import build_numbers
+from wfst.ml.tests import fixture_paths, read_fixtures
 
 
 class NumbersTests(unittest.TestCase):

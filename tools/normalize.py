@@ -11,7 +11,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("text", help="Text to normalize; wrap it in quotes")
     arguments = parser.parse_args()
-    asset = Path(__file__).resolve().parents[1] / "ml" / "assets" / "numbers.fst"
+    asset = Path(__file__).resolve().parents[1] / "wfst" / "ml" / "assets" / "numbers.fst"
     if not asset.is_file():
         parser.error("numbers.fst is missing; run python tools/compile.py first")
     graph = pynini.Fst.read(str(asset))

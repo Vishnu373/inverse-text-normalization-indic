@@ -47,7 +47,7 @@ Install the dependencies:
 python -m pip install -r requirements.txt
 ```
 
-Compile the rules into `ml/assets/numbers.fst`:
+Compile the rules into `wfst/ml/assets/numbers.fst`:
 
 ```sh
 python tools/compile.py
@@ -56,7 +56,7 @@ python tools/compile.py
 ### Step 2: Run The Python Tests
 
 ```sh
-python -m unittest discover -s ml/tests
+python -m unittest discover -s wfst/ml/tests
 ```
 
 ### Step 3: Try Your Own Input
@@ -68,7 +68,7 @@ python tools/normalize.py "മുപ്പത്തിയേഴ്"
 # Output: 37
 ```
 
-This reads `ml/assets/numbers.fst` without rebuilding or modifying it, and prints the result.
+This reads `wfst/ml/assets/numbers.fst` without rebuilding or modifying it, and prints the result.
 
 ### Step 4: Build The Rust Library
 

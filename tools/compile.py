@@ -10,8 +10,8 @@ from pynini.lib import rewrite
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from ml.rules.numbers import build_graph
-from ml.tests import fixture_paths, read_fixtures
+from wfst.ml.rules.numbers import build_graph
+from wfst.ml.tests import fixture_paths, read_fixtures
 
 
 def main() -> None:
@@ -31,7 +31,7 @@ def main() -> None:
             if actual != expected:
                 raise ValueError(f"{path.name}: {spoken!r}: expected {expected!r}, got {actual!r}")
 
-    output = ROOT / "ml" / "assets" / "numbers.fst"
+    output = ROOT / "wfst" / "ml" / "assets" / "numbers.fst"
     if arguments.check:
         if not pynini.equal(graph, pynini.Fst.read(str(output))):
             raise ValueError("numbers.fst is stale; run tools/compile.py")
