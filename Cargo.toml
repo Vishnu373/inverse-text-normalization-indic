@@ -1,0 +1,19 @@
+[package]
+name = "inverse-text-normalization-rs"
+version = "0.1.0"
+edition = "2024"
+description = "WFST inverse text normalization for Indian languages, starting with Malayalam"
+include = [
+    "src/**", "tests/*.rs", "ml/**/*.py", "ml/**/*.tsv", "ml/assets/*.fst",
+    "tools/*.py", "pyproject.toml", "requirements.txt", "Cargo.lock", "README.md",
+]
+
+[dependencies]
+rustfst = "=1.3.1"
+
+[lints.rust]
+unsafe_code = "forbid"
+warnings = "deny"
+
+[lints.clippy]
+all = "deny"
