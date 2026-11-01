@@ -6,6 +6,14 @@ A Rust library that implements inverse text normalization (ITN). It targets Indi
 
 Python uses Pynini to combine Malayalam word mappings and grammar rules into a weighted finite-state transducer (WFST). Rust executes that compiled graph using `rustfst`.
 
+### 1.1 What Is ITN
+
+Inverse text normalization converts spoken-form text, into standard written forms.
+
+| Input | Output |
+|-------|--------|
+| എനിക്ക് നൂറ്റി ഇരുപത്തിയഞ്ച് രൂപ വേണം | എനിക്ക് 125 രൂപ വേണം |
+
 ## 2. Repositories Used
 
 - [Open-Speech-EkStep/indic-punct](https://github.com/Open-Speech-EkStep/indic-punct): reference for Malayalam number vocabulary and Pynini grammar composition.
