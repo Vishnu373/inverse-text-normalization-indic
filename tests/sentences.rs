@@ -2,7 +2,7 @@ use std::process::Command;
 
 use inverse_text_normalization_rs::Normalizer;
 
-// Authored examples, not transcripts collected from an ASR system.
+// Sentence regressions, not a collected ASR corpus.
 const SENTENCES: &[(&str, &str)] = &[
     ("എനിക്ക് നൂറ്റി ഇരുപത്തിയഞ്ച് രൂപ വേണം", "എനിക്ക് 125 രൂപ വേണം"),
     (
@@ -22,6 +22,28 @@ const SENTENCES: &[(&str, &str)] = &[
     ("എനിക്ക് 125 രൂപ വേണം.", "എനിക്ക് 125 രൂപ വേണം."),
     ("നാളെ കൊച്ചിയിലേക്ക് പോകാം.", "നാളെ കൊച്ചിയിലേക്ക് പോകാം."),
     ("ഒരു ദിവസം കാണാം.", "ഒരു ദിവസം കാണാം."),
+    ("ഇവിടെ മുപ്പത്തി നാലേ ഉള്ളൂ", "ഇവിടെ 34 ഉള്ളൂ"),
+    ("ഇവിടെ നാലേ ഉള്ളൂ", "ഇവിടെ 4 ഉള്ളൂ"),
+    (
+        "കൊച്ചിയിലേക്ക് രണ്ട് പോയിന്റ് ഏഴ് അഞ്ച് കിലോമീറ്റർ ദൂരമുണ്ട്.",
+        "കൊച്ചിയിലേക്ക് 2.75 കിലോമീറ്റർ ദൂരമുണ്ട്.",
+    ),
+    (
+        "അരി മൂന്ന് ദശാംശം ഇരുപത്തിയഞ്ച് കിലോ, പഞ്ചസാര പൂജ്യം പോയിന്റ് അഞ്ച് കിലോ വേണം.",
+        "അരി 3.25 കിലോ, പഞ്ചസാര 0.5 കിലോ വേണം.",
+    ),
+    (
+        "  അളവ്\tപന്ത്രണ്ട് ദശാംശം പൂജ്യം പൂജ്യം അഞ്ച് പൂജ്യം; വീണ്ടും 12.0050.\n",
+        "  അളവ്\t12.0050; വീണ്ടും 12.0050.\n",
+    ),
+    (
+        "നിങ്ങളുടെ ഷുഗർ തൊണ്ണൂറ്റി ഏഴേ ദശാംശം നാലേ അഞ്ച് ആണ്",
+        "നിങ്ങളുടെ ഷുഗർ 97.45 ആണ്",
+    ),
+    (
+        "മുന്നൂറ്റി ഇരുപത്തിയഞ്ചേ ദശാംശം രണ്ട് ഒന്ന് എട്ട് ഒന്ന് രണ്ട് നാല്",
+        "325.218124",
+    ),
 ];
 
 #[test]
@@ -42,13 +64,19 @@ fn normalizes_complete_sentences() -> Result<(), Box<dyn std::error::Error>> {
 #[test]
 fn cli_normalizes_sentences_outside_project_directory() -> Result<(), Box<dyn std::error::Error>> {
     for &(input, expected) in SENTENCES {
-        let output = Command::new(env!("CARGO_BIN_EXE_normalize"))
-            .arg(input)
-            .current_dir(std::env::temp_dir())
-            .output()?;
-        assert!(output.status.success(), "{:?}", output);
-        assert_eq!(String::from_utf8(output.stdout)?, format!("{expected}\n"));
-        assert!(output.stderr.is_empty());
+        for text in [input, expected] {
+            let output = Command::new(env!("CARGO_BIN_EXE_normalize"))
+                .arg(text)
+                .current_dir(std::env::temp_dir())
+                .output()?;
+            assert!(output.status.success(), "input: {text}; {output:?}");
+            assert_eq!(
+                String::from_utf8(output.stdout)?,
+                format!("{expected}\n"),
+                "input: {text}"
+            );
+            assert!(output.stderr.is_empty(), "input: {text}");
+        }
     }
     Ok(())
 }

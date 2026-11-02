@@ -94,6 +94,36 @@ class CompositionTests(unittest.TestCase):
         for value in range(1000):
             self.check(spoken(value), str(value))
 
+    def test_spaced_tens_and_spoken_unit_variants(self) -> None:
+        roots = tuple(enumerate(ROOTS, 2)) + ((4, "നാൽപ്പത്ത"),)
+        units = tuple((word, value) for value, word in enumerate(SMALL[1:10], 1))
+        units += (("നാലേ", 4), ("ഏഴേ", 7))
+        for tens, root in roots:
+            for word, value in units:
+                for separator in (" ", "\t", "\u00a0"):
+                    self.check(f"{root}ി{separator}{word}", str(tens * 10 + value))
+        self.check("മുന്നൂറ്റി അമ്പത്തി ഏഴ്", "357")
+        self.check("ഇവിടെ മുപ്പത്തി നാലേ ഉള്ളൂ", "ഇവിടെ 34 ഉള്ളൂ")
+        self.check("ഇവിടെ നാലേ ഉള്ളൂ", "ഇവിടെ 4 ഉള്ളൂ")
+        self.check("ഇരുപത്തി നാല് കോടി മുപ്പത്തി ഏഴേ", "240000037")
+        self.check("തൊണ്ണൂറ്റി പൂജ്യം", "തൊണ്ണൂറ്റി 0")
+        self.check("തൊണ്ണൂറ്റി പത്ത്", "തൊണ്ണൂറ്റി 10")
+
+    def test_spoken_ending_on_every_whole_number_form(self) -> None:
+        # A spoken final "േ" stands for "്" on any complete whole number.
+        samples = list(range(1000)) + [
+            1001, 2005, 12345, 99999, 100004, 2500004, 10000001, 999999999,
+        ]
+        for value in samples:
+            word = spoken(value)
+            if word.endswith("്"):
+                variant = word[:-1] + "േ"
+                self.check(variant, str(value))
+                self.check(f"ഇവിടെ {variant} ഉള്ളൂ", f"ഇവിടെ {value} ഉള്ളൂ")
+        self.check("മുപ്പത്തിനാലേ", "34")
+        self.check("നൂറ്റി ഒന്നേ", "101")
+        self.check("ഇരുപത്തി അഞ്ച് ലക്ഷത്തി നാലേ", "2500004")
+
     def test_all_thousand_multipliers(self) -> None:
         # Rules 7-10 allow every count, with exact and 1/2/3-digit remainders.
         for count in range(1, 100):

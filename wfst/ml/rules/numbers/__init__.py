@@ -7,10 +7,12 @@ import pynini
 from pynini.lib import pynutil, utf8
 
 from wfst.ml.rules.numbers.cardinal import build_numbers
+from wfst.ml.rules.numbers.decimal import build_decimals
 
 
 def build_graph() -> pynini.Fst:
     numbers = build_numbers()
+    numbers |= build_decimals(numbers)
     # Cost 1 per rewrite minus matched characters favors complete scale phrases.
     input_cost = pynutil.add_weight(utf8.VALID_UTF8_CHAR, -1).star
     numbers = pynutil.add_weight(input_cost @ numbers, 1).optimize()

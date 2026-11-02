@@ -232,6 +232,59 @@ fn all_0_to_999() {
 }
 
 #[test]
+fn spaced_tens_and_spoken_unit_variants() {
+    for (tens, root) in ROOTS
+        .iter()
+        .enumerate()
+        .map(|(i, root)| (i + 2, *root))
+        .chain([(4, "നാൽപ്പത്ത")])
+    {
+        for (unit, word) in SMALL[1..10]
+            .iter()
+            .enumerate()
+            .map(|(i, word)| (i + 1, *word))
+            .chain([(4, "നാലേ"), (7, "ഏഴേ")])
+        {
+            for separator in [" ", "\t", "\u{a0}"] {
+                check(
+                    &format!("{root}ി{separator}{word}"),
+                    &(tens * 10 + unit).to_string(),
+                );
+            }
+        }
+    }
+    check("മുന്നൂറ്റി അമ്പത്തി ഏഴ്", "357");
+    check("ഇരുപത്തി നാല് കോടി മുപ്പത്തി ഏഴേ", "240000037");
+    check("തൊണ്ണൂറ്റി പൂജ്യം", "തൊണ്ണൂറ്റി 0");
+    check("തൊണ്ണൂറ്റി പത്ത്", "തൊണ്ണൂറ്റി 10");
+}
+
+#[test]
+fn spoken_ending_on_every_whole_number_form() {
+    // A spoken final "േ" stands for "്" on any complete whole number.
+    let extra = [
+        1001,
+        2005,
+        12_345,
+        99_999,
+        100_004,
+        2_500_004,
+        10_000_001,
+        999_999_999,
+    ];
+    for value in (0..1000).chain(extra) {
+        let word = spoken(value);
+        if let Some(stem) = word.strip_suffix('്') {
+            check(&format!("{stem}േ"), &value.to_string());
+            check(&format!("ഇവിടെ {stem}േ ഉള്ളൂ"), &format!("ഇവിടെ {value} ഉള്ളൂ"));
+        }
+    }
+    check("മുപ്പത്തിനാലേ", "34");
+    check("നൂറ്റി ഒന്നേ", "101");
+    check("ഇരുപത്തി അഞ്ച് ലക്ഷത്തി നാലേ", "2500004");
+}
+
+#[test]
 fn all_thousand_multipliers() {
     for count in 1..100 {
         for rest in [0, 1, 9, 10, 99, 100, 999] {

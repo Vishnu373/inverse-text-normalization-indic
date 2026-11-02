@@ -1,4 +1,4 @@
-//! WFST inverse text normalization for Malayalam whole numbers.
+//! WFST inverse text normalization for Malayalam whole numbers and decimals.
 
 mod runtime;
 

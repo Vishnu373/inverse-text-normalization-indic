@@ -4,7 +4,7 @@ import csv
 from pathlib import Path
 
 import pynini
-from pynini.lib import pynutil
+from pynini.lib import pynutil, utf8
 
 DATA = Path(__file__).parents[2] / "data" / "numbers.tsv"
 DIGIT = pynini.union(*"0123456789")
@@ -36,11 +36,25 @@ def table(name: str) -> pynini.Fst:
     return pynini.string_map(pairs, input_token_type="byte", output_token_type="byte")
 
 
+def with_spoken_ending(graph: pynini.Fst) -> pynini.Fst:
+    """Accept final long-e only if its virama form belongs to this numeric graph."""
+    ending = utf8.VALID_UTF8_CHAR.star + pynini.cross("േ", "്")
+    return (graph | (ending @ graph)).optimize()
+
+
+def build_digits() -> pynini.Fst:
+    return with_spoken_ending(table("digits"))
+
+
 def build_numbers() -> pynini.Fst:
     digits = table("digits")
     digits |= table("teens")
     digits |= table("tens")
     digits |= table("tens_prefixes") + table("tens_units")
+    digits |= (
+        table("tens_prefixes") + pynutil.delete("ി") + SPACE
+        + (table("digits") @ POSITIVE)
+    )
     small = (digits @ POSITIVE).optimize()
 
     digits |= table("hundreds")
@@ -78,4 +92,4 @@ def build_numbers() -> pynini.Fst:
         scale_count + SPACE + pynutil.delete("കോടി") + SPACE
         + padded(below_crore, 7)
     )
-    return digits
+    return with_spoken_ending(digits)

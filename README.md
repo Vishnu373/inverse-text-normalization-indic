@@ -32,7 +32,7 @@ These are reference repositories, not runtime dependencies. This crate has its o
 | Type | Language |
 |-------|--------|
 | numbers | malayalam (ml) |
-
+| decimals | malayalam (ml) |
 
 ## 4. How To Set It Up Locally
 
@@ -76,6 +76,13 @@ python tools/normalize.py "മുപ്പത്തിയേഴ്"
 # Output: 37
 ```
 
+Try a decimal:
+
+```sh
+python tools/normalize.py "രണ്ട് പോയിന്റ് പൂജ്യം അഞ്ച്"
+# Output: 2.05
+```
+
 This reads `wfst/ml/assets/numbers.fst` without rebuilding or modifying it, and prints the result.
 
 ### Step 4: Build The Rust Library
@@ -93,7 +100,7 @@ cargo test
 cargo test --test sentences
 ```
 
-`tests/sentences.rs` contains authored Malayalam examples, not collected ASR transcripts. They check complete number phrases, multiple numbers, surrounding text, whitespace, and mixed Malayalam-English input. 
+`tests/sentences.rs` contains Malayalam sentence regressions, not a collected ASR corpus. They check whole-number and decimal phrases, multiple numbers, surrounding text, whitespace, and mixed Malayalam-English input.
 
 ### Step 6: Try A Full Sentence In Rust
 
@@ -102,6 +109,13 @@ Pass the entire sentence as one quoted argument, not word by word:
 ```sh
 cargo run -- "എനിക്ക് നൂറ്റി ഇരുപത്തിയഞ്ച് രൂപ വേണം"
 # Output: എനിക്ക് 125 രൂപ വേണം
+```
+
+Try a sentence containing a decimal:
+
+```sh
+cargo run -- "അളവ് മൂന്ന് ദശാംശം ഇരുപത്തഞ്ച് കിലോ."
+# Output: അളവ് 3.25 കിലോ.
 ```
 
 The Rust command uses the embedded `numbers.fst`, prints the normalized text.
