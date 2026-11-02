@@ -7,8 +7,6 @@
 __pycache__/
 *.py[cod]
 
-# Local agent instructions
-AGENTS.md
 
 # Operating-system metadata
 .DS_Store
