@@ -6,6 +6,7 @@ from typing import ClassVar
 import pynini
 from pynini.lib import rewrite
 
+from wfst.ml.postprocess import reorder_fractions
 from wfst.ml.rules.numbers import build_graph
 from wfst.ml.rules.numbers.cardinal import build_numbers
 from wfst.ml.rules.numbers.decimal import build_decimals
@@ -21,10 +22,10 @@ class DecimalTests(unittest.TestCase):
 
     def check(self, text: str, expected: str) -> None:
         with self.subTest(text=text):
-            actual = rewrite.one_top_rewrite(pynini.escape(text), self.graph)
+            actual = reorder_fractions(rewrite.one_top_rewrite(pynini.escape(text), self.graph))
             self.assertEqual(actual, expected)
             self.assertEqual(
-                rewrite.one_top_rewrite(pynini.escape(actual), self.graph), actual,
+                reorder_fractions(rewrite.one_top_rewrite(pynini.escape(actual), self.graph)), actual,
             )
 
     def test_both_markers_and_grouped_fractional_numbers(self) -> None:

@@ -5,9 +5,16 @@ from typing import ClassVar
 import pynini
 from pynini.lib import rewrite
 
+from wfst.ml.postprocess import reorder_fractions
 from wfst.ml.rules.numbers import build_graph
 from wfst.ml.rules.numbers.cardinal import build_numbers
 from wfst.ml.tests import fixture_paths, read_fixtures
+
+
+class AssetSizeTests(unittest.TestCase):
+    def test_compiled_graph_has_bounded_state_count(self) -> None:
+        path = Path(__file__).parents[1] / "assets" / "numbers.fst"
+        self.assertLess(pynini.Fst.read(str(path)).num_states(), 10000)
 
 
 class NumbersTests(unittest.TestCase):
@@ -21,13 +28,13 @@ class NumbersTests(unittest.TestCase):
         for path in fixture_paths():
             for spoken, expected in read_fixtures(path):
                 with self.subTest(fixture=path.name, spoken=spoken):
-                    actual = rewrite.one_top_rewrite(
+                    actual = reorder_fractions(rewrite.one_top_rewrite(
                         pynini.escape(spoken), self.graph,
                         input_token_type="byte", output_token_type="byte"
-                    )
+                    ))
                     self.assertEqual(actual, expected)
                     self.assertEqual(
-                        rewrite.one_top_rewrite(pynini.escape(actual), self.graph),
+                        reorder_fractions(rewrite.one_top_rewrite(pynini.escape(actual), self.graph)),
                         actual,
                     )
 
@@ -39,7 +46,7 @@ class NumbersTests(unittest.TestCase):
         ]:
             with self.subTest(spoken=spoken):
                 self.assertEqual(
-                    rewrite.one_top_rewrite(pynini.escape(spoken), self.graph),
+                    reorder_fractions(rewrite.one_top_rewrite(pynini.escape(spoken), self.graph)),
                     expected,
                 )
 

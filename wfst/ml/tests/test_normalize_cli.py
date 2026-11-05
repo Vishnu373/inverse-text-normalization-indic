@@ -30,6 +30,8 @@ class NormalizeCliTests(unittest.TestCase):
                 "325.218124",
             ),
             ("hello", "hello"),
+            ("നാലിൽ ഒന്ന്; അഞ്ചിൽ ഏഴ്", "1/4; 7/5"),
+            ("\ue003", "\ue003"),
             ("", ""),
         ]:
             with self.subTest(spoken=spoken):
@@ -54,6 +56,18 @@ class NormalizeCliTests(unittest.TestCase):
         self.assertIn("required", result.stderr)
         self.assertEqual(result.stdout, "")
 
+    def test_reserved_fraction_markers_are_rejected(self) -> None:
+        for text in ("\ue000", "text\ue001text", "\ue002", "\ue0005\ue0017\ue002"):
+            with self.subTest(text=text):
+                result = subprocess.run(
+                    [sys.executable, str(ROOT / "tools" / "normalize.py"), text],
+                    cwd=ROOT / "wfst" / "ml", capture_output=True, encoding="utf-8",
+                    check=False, timeout=30,
+                )
+                self.assertEqual(result.returncode, 2)
+                self.assertIn("reserved", result.stderr)
+                self.assertEqual(result.stdout, "")
+
     def test_missing_and_corrupt_assets_fail_without_output(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -61,6 +75,10 @@ class NormalizeCliTests(unittest.TestCase):
             tools.mkdir()
             script = tools / "normalize.py"
             shutil.copy2(ROOT / "tools" / "normalize.py", script)
+            shutil.copytree(
+                ROOT / "wfst", root / "wfst",
+                ignore=shutil.ignore_patterns("__pycache__", "assets"),
+            )
             asset = root / "wfst" / "ml" / "assets" / "numbers.fst"
             for corrupt in (False, True):
                 with self.subTest(corrupt=corrupt):

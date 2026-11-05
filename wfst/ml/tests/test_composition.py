@@ -7,6 +7,8 @@ import unittest
 import pynini
 from pynini.lib import rewrite
 
+from wfst.ml.postprocess import reorder_fractions
+
 
 # These explicit forms are the approved plan vocabulary and its combining forms.
 SMALL = (
@@ -73,13 +75,13 @@ class CompositionTests(unittest.TestCase):
 
     def check(self, text: str, expected: str) -> None:
         with self.subTest(text=text, expected=expected):
-            actual = rewrite.one_top_rewrite(
+            actual = reorder_fractions(rewrite.one_top_rewrite(
                 pynini.escape(text), self.graph,
                 input_token_type="byte", output_token_type="byte",
-            )
+            ))
             self.assertEqual(actual, expected)
             self.assertEqual(
-                rewrite.one_top_rewrite(pynini.escape(actual), self.graph), actual,
+                reorder_fractions(rewrite.one_top_rewrite(pynini.escape(actual), self.graph)), actual,
                 "Normalized text must be idempotent",
             )
 

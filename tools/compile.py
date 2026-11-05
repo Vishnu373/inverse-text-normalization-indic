@@ -10,6 +10,7 @@ from pynini.lib import rewrite
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+from wfst.ml.postprocess import reorder_fractions
 from wfst.ml.rules.numbers import build_graph
 from wfst.ml.tests import fixture_paths, read_fixtures
 
@@ -24,10 +25,10 @@ def main() -> None:
     graph = build_graph()
     for path in fixture_paths():
         for spoken, expected in read_fixtures(path):
-            actual = rewrite.one_top_rewrite(
+            actual = reorder_fractions(rewrite.one_top_rewrite(
                 pynini.escape(spoken), graph,
                 input_token_type="byte", output_token_type="byte"
-            )
+            ))
             if actual != expected:
                 raise ValueError(f"{path.name}: {spoken!r}: expected {expected!r}, got {actual!r}")
 

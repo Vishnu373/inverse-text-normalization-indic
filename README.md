@@ -33,6 +33,7 @@ These are reference repositories, not runtime dependencies. This crate has its o
 |-------|--------|
 | numbers | malayalam (ml) |
 | decimals | malayalam (ml) |
+| fractions | malayalam (ml) |
 
 ## 4. How To Set It Up Locally
 
@@ -67,6 +68,8 @@ python tools/compile.py
 python -m unittest discover -s wfst/ml/tests
 ```
 
+The compiler integration test rebuilds the full grammar five times; each subprocess has a 30-second timeout.
+
 ### Step 3: Try Your Own Input
 
 Pass your text as a quoted argument:
@@ -81,6 +84,13 @@ Try a decimal:
 ```sh
 python tools/normalize.py "രണ്ട് പോയിന്റ് പൂജ്യം അഞ്ച്"
 # Output: 2.05
+```
+
+Try a fraction:
+
+```sh
+python tools/normalize.py "മൂന്ന് ബാർ നാല്"
+# Output: 3/4
 ```
 
 This reads `wfst/ml/assets/numbers.fst` without rebuilding or modifying it, and prints the result.
@@ -100,7 +110,7 @@ cargo test
 cargo test --test sentences
 ```
 
-`tests/sentences.rs` contains Malayalam sentence regressions, not a collected ASR corpus. They check whole-number and decimal phrases, multiple numbers, surrounding text, whitespace, and mixed Malayalam-English input.
+`tests/sentences.rs` contains Malayalam sentence regressions, not a collected ASR corpus. They check whole-number, decimal, and fraction phrases, multiple numbers, surrounding text, whitespace, and mixed Malayalam-English input.
 
 ### Step 6: Try A Full Sentence In Rust
 
@@ -117,5 +127,20 @@ Try a sentence containing a decimal:
 cargo run -- "അളവ് മൂന്ന് ദശാംശം ഇരുപത്തഞ്ച് കിലോ."
 # Output: അളവ് 3.25 കിലോ.
 ```
+
+Try a sentence containing a mixed number:
+
+```sh
+cargo run -- "ഒന്നര കിലോ അരി വേണം."
+# Output: 1 1/2 കിലോ അരി വേണം.
+```
+
+Fractions keep their spoken components without reduction: `രണ്ട് ബാർ നാല്` becomes `2/4`. Denominator-first forms such as `നാലിൽ മൂന്ന്` become `3/4`, with denominators limited to 1-100; bar forms use the full existing number range. Fused numerator-one forms also work: `മൂന്നിലൊന്ന്` becomes `1/3`, and `അഞ്ചിലൊന്ന്` becomes `1/5`. Other numerators still require whitespace.
+
+Internally, denominator-first fractions use markers U+E000-U+E002 and a small post-processing step in both Python and Rust to swap the digit strings. This keeps the graph compact without reducing the supported number ranges. These markers are rejected in user input; malformed graph markers raise an error rather than appearing in the result.
+
+Mixed numbers require explicit joins such as `രണ്ടര` or `രണ്ടേ കാൽ`. Plain adjacency preserves the word: `അഞ്ച് കാൽ മേശ` becomes `5 കാൽ മേശ`, not `5 1/4 മേശ`. Standalone `അര കിലോ` still becomes `1/2 കിലോ`.
+
+Before lakh or crore, fractional counts use fixed digit endings: `രണ്ടര ലക്ഷം രൂപ` becomes `250000 രൂപ`, and `മൂന്നേ മുക്കാൽ കോടി` becomes `37500000`. Whole counts follow the existing 1-99 limit; bare `അര ലക്ഷം` becomes `50000`. Extra remainders and fractional lakh amounts inside crore expressions are not combined.
 
 The Rust command uses the embedded `numbers.fst`, prints the normalized text.
