@@ -1,6 +1,6 @@
 use std::process::ExitCode;
 
-use inverse_text_normalization_rs::Normalizer;
+use itn_indic::Normalizer;
 
 fn main() -> ExitCode {
     let mut arguments = std::env::args_os().skip(1);

@@ -2,7 +2,7 @@
 
 ## 1. What The Project Is For
 
-A Rust library that implements inverse text normalization (ITN). It targets Indian languages, starting with Malayalam: `അഞ്ച്` becomes `5`.
+`itn-indic` is a Rust library that implements inverse text normalization (ITN). It targets Indian languages, starting with Malayalam: `അഞ്ച്` becomes `5`.
 
 Python uses Pynini to combine Malayalam word mappings and grammar rules into a weighted finite-state transducer (WFST). Rust executes that compiled graph using `rustfst`.
 
@@ -17,6 +17,7 @@ Inverse text normalization converts spoken-form text, into standard written form
 ## 2. Repositories Used
 
 - [Open-Speech-EkStep/indic-punct](https://github.com/Open-Speech-EkStep/indic-punct): reference for Malayalam number vocabulary and Pynini grammar composition.
+- [NVIDIA/NeMo-text-processing](https://github.com/NVIDIA/NeMo-text-processing): reference for the Python Pynini approach used to build the WFST graph.
 - [FluidInference/text-processing-rs](https://github.com/FluidInference/text-processing-rs): reference for Rust library structure and WFST integration patterns.
 
 These are reference repositories, not runtime dependencies. This crate has its own shared Rust runtime using `rustfst`.
@@ -35,7 +36,63 @@ These are reference repositories, not runtime dependencies. This crate has its o
 | decimals | malayalam (ml) |
 | fractions | malayalam (ml) |
 
-## 4. How To Set It Up Locally
+## 4. Use In Your Rust Application
+
+### 4.1 Installation
+
+Add this dependency to your application's `Cargo.toml`:
+
+```toml
+[dependencies]
+itn-indic = "0.1.0"
+```
+
+Requires Rust 1.90 or newer. The compiled graph is bundled with the crate and embedded in your application's executable. No repository checkout, Python, Pynini, native OpenFst, or separate graph files are needed to build or run your application.
+
+### 4.2 Quick Start
+
+```rust
+use itn_indic::{AppError, Normalizer};
+
+fn main() -> Result<(), AppError> {
+    let normalizer = Normalizer::new("ml")?;
+
+    assert_eq!(normalizer.normalize("അഞ്ച് രൂപ")?, "5 രൂപ");
+    assert_eq!(normalizer.normalize("രണ്ട് പോയിന്റ് പൂജ്യം അഞ്ച്")?, "2.05");
+    assert_eq!(normalizer.normalize("മൂന്ന് ബാർ നാല്")?, "3/4");
+    Ok(())
+}
+```
+
+Initialize once at application startup and reuse the normalizer for incoming text. Pass complete phrases or sentences, not individual words. `normalize` is synchronous CPU work; in an async backend, use your runtime's blocking-work mechanism when needed to avoid blocking request executors.
+
+### 4.3 Public API
+
+| Method | Returns | Purpose |
+|--------|---------|---------|
+| `Normalizer::new(language: &str)` | `Result<Normalizer, AppError>` | Load the bundled graph; only exact lowercase `"ml"` is supported |
+| `normalizer.normalize(input: &str)` | `Result<String, AppError>` | Normalize supported expressions in a sentence |
+| `error.code()` | `&'static str` | Obtain a stable, machine-readable error code |
+
+`AppError` implements `std::error::Error` and `Display`. Propagate errors with `?` as above, or handle them using `code()`; do not depend on diagnostic message wording.
+
+| Error Code | Meaning |
+|------------|---------|
+| `UNSUPPORTED_LANGUAGE` | The language is not `"ml"` |
+| `INVALID_INPUT` | Input contains NUL or reserved fraction markers U+E000-U+E002 |
+| `GRAPH_LOAD_FAILED` | The bundled graph could not be loaded |
+| `GRAPH_EXECUTION_FAILED` | Graph execution or output decoding failed |
+
+### 4.4 Supported Behavior
+
+- Malayalam ITN for whole numbers `0` through `999999999`, unsigned decimals, and fractions. TN, signs, dates, currency formatting, and other languages are not implemented.
+- Empty input returns an empty string. Unrelated text is preserved; unsupported expressions may partially normalize because this is sentence rewriting, not whole-input validation.
+- Fractions preserve their spoken components without reduction: `രണ്ട് ബാർ നാല്` becomes `2/4`.
+- Graph updates require a new crate build; there are no runtime model downloads or grammar-compilation steps.
+
+## 5. How To Set It Up Locally
+
+This section is for contributors changing the grammar or working on this repository, not applications consuming the crate.
 
 For the Python steps, use Linux or WSL on x86-64 and Python 3.12 with pip and venv available. A current stable Rust toolchain is only needed for the Rust build.
 

@@ -1,4 +1,4 @@
-use inverse_text_normalization_rs::Normalizer;
+use itn_indic::Normalizer;
 
 #[test]
 fn approved_fraction_fixtures() -> Result<(), Box<dyn std::error::Error>> {

@@ -1,6 +1,6 @@
 use std::process::Command;
 
-use inverse_text_normalization_rs::Normalizer;
+use itn_indic::Normalizer;
 
 // Sentence regressions, not a collected ASR corpus.
 const SENTENCES: &[(&str, &str)] = &[

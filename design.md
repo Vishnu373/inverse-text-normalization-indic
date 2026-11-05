@@ -28,6 +28,7 @@ numbers.tsv --> cardinal.py --+--> whole numbers --+
 | Public API | `src/lib.rs` | `Normalizer::new("ml")`, `normalize`, typed `AppError` codes; rejects NUL and reserved fraction markers |
 | Runtime | `src/runtime.rs` | Input acceptor → compose → epsilon removal → shortest path → UTF-8 output (`rustfst`) |
 | Rust CLI | `src/bin/normalize.rs` | One sentence argument; exit 2 on usage errors, 1 on `AppError` |
+| Crate distribution | `Cargo.toml`, `README.md`, `src/lib.rs` | Package metadata, crates.io installation, and public API documentation; bundles the graph and license |
 | Shared fixtures | `wfst/ml/tests/numbers.tsv`, `decimals.tsv`, `fractions.tsv` | Spoken → expected; checked by Python, `compile.py` and Rust |
 | Python tests | `wfst/ml/tests/` | Fresh grammar, saved asset, independent oracle, CLI tools |
 | Rust tests | `tests/` | Fixtures, independent oracles, decimals, fractions, sentences and CLI |

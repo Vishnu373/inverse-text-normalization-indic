@@ -1,5 +1,5 @@
 //! Independent approved vocabulary and arithmetic oracle for plan rules 1-14.
-use inverse_text_normalization_rs::Normalizer;
+use itn_indic::Normalizer;
 use std::sync::OnceLock;
 
 const SMALL: [&str; 20] = [

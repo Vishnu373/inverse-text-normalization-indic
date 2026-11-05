@@ -1,12 +1,18 @@
 [package]
-name = "inverse-text-normalization-rs"
+name = "itn-indic"
 version = "0.1.0"
 edition = "2024"
-description = "WFST inverse text normalization for Indian languages, starting with Malayalam"
+rust-version = "1.90"
+description = "inverse text normalization for Indian languages"
+license = "Apache-2.0"
+repository = "https://github.com/Vishnu373/inverse-text-normalization-indic"
+readme = "README.md"
 include = [
     "src/**", "tests/*.rs", "wfst/**/*.py", "wfst/**/*.tsv", "wfst/*/assets/*.fst",
-    "tools/*.py", "pyproject.toml", "requirements.txt", "Cargo.lock", "README.md",
+    "tools/*.py", "pyproject.toml", "requirements.txt", "Cargo.lock", "README.md", "/LICENSE",
 ]
+keywords = ["itn", "indian-languages", "malayalam", "asr", "speech-to-text"]
+categories = ["text-processing"]
 
 [dependencies]
 rustfst = "=1.3.1"

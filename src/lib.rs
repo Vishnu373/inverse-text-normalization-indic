@@ -1,4 +1,26 @@
 //! WFST inverse text normalization for Malayalam whole numbers, decimals, and fractions.
+//!
+//! Construct a [`Normalizer`] once and reuse it for complete phrases or sentences.
+//! The compiled graph is embedded; Python and native OpenFst are not required.
+//!
+//! # Example
+//!
+//! ```
+//! use itn_indic::{AppError, Normalizer};
+//!
+//! fn main() -> Result<(), AppError> {
+//!     let normalizer = Normalizer::new("ml")?;
+//!
+//!     assert_eq!(normalizer.normalize("അഞ്ച് രൂപ")?, "5 രൂപ");
+//!     assert_eq!(normalizer.normalize("രണ്ട് പോയിന്റ് പൂജ്യം അഞ്ച്")?, "2.05");
+//!     assert_eq!(normalizer.normalize("മൂന്ന് ബാർ നാല്")?, "3/4");
+//!     Ok(())
+//! }
+//! ```
+//!
+//! Only exact lowercase `"ml"` is supported. This is sentence rewriting, not
+//! whole-input validation: unsupported expressions may partially normalize.
+//! Errors are returned as [`AppError`], with stable codes from [`AppError::code`].
 
 mod runtime;
 
@@ -9,9 +31,13 @@ use runtime::Runtime;
 /// A normalization failure with a stable machine-readable code.
 #[derive(Debug)]
 pub enum AppError {
+    /// The requested language is not supported.
     UnsupportedLanguage(String),
+    /// Input contains NUL or a reserved fraction marker.
     InvalidInput(&'static str),
+    /// The bundled graph could not be loaded.
     GraphLoad(String),
+    /// Graph execution or output decoding failed.
     GraphExecution(String),
 }
 
@@ -43,12 +69,25 @@ impl fmt::Display for AppError {
 impl std::error::Error for AppError {}
 
 /// A reusable normalizer that owns its compiled language graph.
+///
+/// Debug output omits the compiled graph.
 pub struct Normalizer {
     runtime: Runtime,
 }
 
+impl fmt::Debug for Normalizer {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.debug_struct("Normalizer").finish_non_exhaustive()
+    }
+}
+
 impl Normalizer {
     /// Load a bundled language graph. Currently only `ml` is supported.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`AppError::UnsupportedLanguage`] for any language other than `"ml"`,
+    /// or [`AppError::GraphLoad`] if the bundled graph cannot be loaded.
     pub fn new(language: &str) -> Result<Self, AppError> {
         let bytes: &[u8] = match language {
             "ml" => include_bytes!("../wfst/ml/assets/numbers.fst"),
@@ -63,16 +102,23 @@ impl Normalizer {
     ///
     /// NUL is rejected because label zero represents epsilon in the graph.
     /// U+E000, U+E001, and U+E002 are reserved for fraction output markers.
+    /// Empty input returns an empty string. Unsupported expressions may partially
+    /// normalize; this method does not validate an entire number expression.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`AppError::InvalidInput`] for NUL or reserved fraction markers,
+    /// or [`AppError::GraphExecution`] if graph execution or output decoding fails.
     ///
     /// ```
-    /// use inverse_text_normalization_rs::Normalizer;
+    /// use itn_indic::Normalizer;
     /// let normalizer = Normalizer::new("ml")?;
     /// assert_eq!(normalizer.normalize("അഞ്ച് രൂപ")?, "5 രൂപ");
     /// assert_eq!(
     ///     normalizer.normalize("ആയിരത്തി ഒരു നൂറ്റി ഇരുപത്തിയഞ്ച്")?,
     ///     "1125"
     /// );
-    /// # Ok::<(), inverse_text_normalization_rs::AppError>(())
+    /// # Ok::<(), itn_indic::AppError>(())
     /// ```
     pub fn normalize(&self, input: &str) -> Result<String, AppError> {
         if input.contains('\0') {

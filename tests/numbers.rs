@@ -1,4 +1,4 @@
-use inverse_text_normalization_rs::Normalizer;
+use itn_indic::Normalizer;
 
 #[test]
 fn approved_numbers_and_preservation_fixtures() -> Result<(), Box<dyn std::error::Error>> {
@@ -37,9 +37,7 @@ fn preserves_spacing_and_empty_input() -> Result<(), Box<dyn std::error::Error>>
 #[test]
 fn rejects_unsupported_languages() {
     for language in ["en", "hi", "", "ML"] {
-        let error = Normalizer::new(language)
-            .err()
-            .expect("unsupported language");
+        let error = Normalizer::new(language).expect_err("unsupported language");
         assert_eq!(error.code(), "UNSUPPORTED_LANGUAGE");
     }
 }
@@ -49,5 +47,23 @@ fn rejects_nul_instead_of_treating_it_as_epsilon() -> Result<(), Box<dyn std::er
     let normalizer = Normalizer::new("ml")?;
     let error = normalizer.normalize("അഞ്ച്\0രണ്ട്").expect_err("NUL input");
     assert_eq!(error.code(), "INVALID_INPUT");
+    Ok(())
+}
+
+#[test]
+fn supports_derived_debug_without_exposing_graph() -> Result<(), Box<dyn std::error::Error>> {
+    #[derive(Debug)]
+    struct ApplicationState {
+        normalizer: Normalizer,
+    }
+
+    let state = ApplicationState {
+        normalizer: Normalizer::new("ml")?,
+    };
+    assert_eq!(
+        format!("{state:?}"),
+        "ApplicationState { normalizer: Normalizer { .. } }"
+    );
+    assert_eq!(state.normalizer.normalize("അഞ്ച്")?, "5");
     Ok(())
 }

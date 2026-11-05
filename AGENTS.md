@@ -10,7 +10,7 @@
 - `wfst/ml/`: Malayalam grammar package: `data/numbers.tsv` vocabulary, `rules/numbers/` grammar, `postprocess.py` fraction-marker decoding, `assets/numbers.fst` generated graph, `tests/` Python tests and shared fixture TSVs.
 - `tests/`: Rust integration tests: `numbers.rs`, `decimals.rs`, and `fractions.rs` (fixtures/category checks), `number_composition.rs` (independent oracle), `sentences.rs` (sentences and CLI).
 - `tools/`: `compile.py` builds/checks the asset; `normalize.py` runs one input against the saved asset.
-- Root: `Cargo.toml`/`Cargo.lock` (Rust deps), `requirements.txt` (pinned Python deps), `pyproject.toml` (strict mypy config only).
+- Root: `CONTRIBUTING.md` (contributor workflow and versioning), `Cargo.toml`/`Cargo.lock` (Rust deps), `requirements.txt` (pinned Python deps), `pyproject.toml` (strict mypy config only).
 
 ## Execution And Assets
 - `src/lib.rs` exposes `Normalizer::new("ml")` and embeds `wfst/ml/assets/numbers.fst`. Reuse the normalizer; only exact lowercase `ml` is accepted. Empty input works; NUL is rejected because label zero is epsilon. U+E000-U+E002 are reserved fraction markers and also rejected as `INVALID_INPUT`; other private-use characters are preserved.
@@ -73,3 +73,7 @@ cargo test
 - Do not block the conversation with `pidwait` or other waits for the full Python suite; report the fix and focused results promptly, leave slow checks in the background, and label full verification pending until they finish.
 - Map the fused-half suffix `ര` directly to `1/2`; do not filter and project the fractions table just to recover a constant output.
 - Accept fused numerator-one readings such as `മൂന്നിലൊന്ന്` through the existing bounded denominator rule and marker decoder; keep other denominator-first numerators space-separated and protect word boundaries.
+- Document crates.io installation and public API usage for application developers; keep local checkout setup separate. Do not add "not yet published" notes to README: it ships in the crate and freezes into the release.
+- Anchor package include paths such as `/LICENSE` at the crate root to avoid bundling matching files from `.venv`.
+- Run package verification separately from Rust tests when sharing `target/`; package builds can invalidate artifacts needed by doctests.
+- Keep `Normalizer` debug formatting graph-free so application structs can derive `Debug` without dumping the WFST.
